@@ -1,0 +1,31 @@
+{
+    "type": "table",
+    "name": "countries",
+    "database": "receipt_api",
+    "data": [
+        {
+            "id": "1",
+            "title": "United States of America",
+            "code": "US",
+            "ship_rate": "2.00",
+            "created_at": "2021-10-17 20:37:21",
+            "updated_at": "2021-10-17 20:37:21"
+        },
+        {
+            "id": "2",
+            "title": "United Kingdom",
+            "code": "UK",
+            "ship_rate": "3.00",
+            "created_at": "2021-10-17 20:37:21",
+            "updated_at": "2021-10-17 20:37:21"
+        },
+        {
+            "id": "3",
+            "title": "Republic of China",
+            "code": "CN",
+            "ship_rate": "2.00",
+            "created_at": "2021-10-17 20:37:21",
+            "updated_at": "2021-10-17 20:37:21"
+        }
+    ]
+}

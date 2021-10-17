@@ -1,0 +1,55 @@
+{
+    "type": "table",
+    "name": "offers",
+    "database": "receipt_api",
+    "data": [
+        {
+            "id": "1",
+            "title": "10% off shoes",
+            "valid_from": "2021-10-17 20:31:07",
+            "valid_to": "2021-12-01 20:15:10",
+            "applied_on_type": "TYPE",
+            "applied_on_id": "4",
+            "count_range_min": "1",
+            "count_range_max": "1",
+            "discount_on_type": "TYPE",
+            "discount_on_id": "4",
+            "discount_type": "PERCENT",
+            "dicount_value": "0.10",
+            "created_at": "2021-10-17 20:37:21",
+            "updated_at": "2021-10-17 20:37:21"
+        },
+        {
+            "id": "2",
+            "title": "50% off jacket",
+            "valid_from": "2021-10-17 20:31:07",
+            "valid_to": "2021-12-01 20:15:10",
+            "applied_on_type": "TYPE",
+            "applied_on_id": "1",
+            "count_range_min": "2",
+            "count_range_max": "2",
+            "discount_on_type": "ITEM",
+            "discount_on_id": "5",
+            "discount_type": "PERCENT",
+            "dicount_value": "0.50",
+            "created_at": "2021-10-17 20:37:21",
+            "updated_at": "2021-10-17 20:37:21"
+        },
+        {
+            "id": "3",
+            "title": "$10 of shipping",
+            "valid_from": "2021-10-17 20:31:07",
+            "valid_to": "2021-12-01 20:25:48",
+            "applied_on_type": "ITEM",
+            "applied_on_id": null,
+            "count_range_min": "2",
+            "count_range_max": "65535",
+            "discount_on_type": "SHIP",
+            "discount_on_id": null,
+            "discount_type": "PERCENT",
+            "dicount_value": "0.10",
+            "created_at": "2021-10-17 20:37:21",
+            "updated_at": "2021-10-17 20:37:21"
+        }
+    ]
+}
