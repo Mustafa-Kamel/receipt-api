@@ -8,7 +8,7 @@ use App\Models\Item;
 class Country extends Model
 {
     protected $table = 'countries';
-    protected $fillable = ['title', 'code', 'ship_rate'];
+    protected $fillable = ['title', 'code', 'ship_rate', 'ship_weight'];
 
     public function items()
     {

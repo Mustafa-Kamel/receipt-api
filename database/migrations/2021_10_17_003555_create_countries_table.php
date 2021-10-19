@@ -18,6 +18,7 @@ class CreateCountriesTable extends Migration
             $table->string('title');
             $table->string('code', 3);
             $table->decimal('ship_rate')->nullable();
+            $table->float('ship_weight')->default(100);
             $table->timestamps();
         });
     }
