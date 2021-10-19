@@ -44,7 +44,7 @@
             "applied_on_id": null,
             "count_range_min": "2",
             "count_range_max": "65535",
-            "discount_on_type": "SHIP",
+            "discount_on_type": "App\\Models\\Shipping",
             "discount_on_id": null,
             "discount_type": "PERCENT",
             "dicount_value": "0.10",
