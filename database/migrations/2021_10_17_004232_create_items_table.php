@@ -18,6 +18,7 @@ class CreateItemsTable extends Migration
             $table->string('title');
             $table->decimal('price');
             $table->float('weight')->nullable();
+            $table->unsignedSmallInteger('in_stock')->default(65535);
             $table->unsignedBigInteger('type_id');
             $table->unsignedBigInteger('country_id');
             $table->foreign('type_id')->references('id')->on('itemtypes')->onDelete('CASCADE');
