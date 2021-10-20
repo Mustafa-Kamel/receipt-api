@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Shipping;
 
 class Offer extends Model
 {
@@ -21,5 +22,12 @@ class Offer extends Model
     public function discount_on()
     {
         return $this->morphTo(__FUNCTION__, 'discount_on_type', 'discount_on_id');
+    }
+
+    public function is_shipping_discount()
+    {
+        if (app($this->discount_on_type) instanceof Shipping)
+            return TRUE;
+        return False;
     }
 }
