@@ -46,8 +46,8 @@
             "count_range_max": "65535",
             "discount_on_type": "App\\Models\\Shipping",
             "discount_on_id": null,
-            "discount_type": "PERCENT",
-            "discount_value": "0.10",
+            "discount_type": "FIXED",
+            "discount_value": "10",
             "created_at": "2021-10-17 20:37:21",
             "updated_at": "2021-10-17 20:37:21"
         }
