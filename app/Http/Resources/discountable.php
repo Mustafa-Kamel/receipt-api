@@ -35,17 +35,15 @@ trait discountable
 
     private function apply_discounts()
     {
-        foreach ($this->offers->groupBy('applied_on_type') as $itemTypeOffers) {
-            foreach ($itemTypeOffers as $offer) {
-                if ($this->is_offer_applicable($offer)) {
-                    $value = $this->get_discount_value(
-                        $offer->discount_type,
-                        $offer->discount_value,
-                        $this->get_discountable($offer)
-                    );
-                    $this->discounts[$offer->title] = '-$' . $value;
-                    $this->discounts_sum += $value;
-                }
+        foreach ($this->offers as $offer) {
+            if ($this->is_offer_applicable($offer)) {
+                $value = $this->get_discount_value(
+                    $offer->discount_type,
+                    $offer->discount_value,
+                    $this->get_discountable($offer)
+                );
+                $this->discounts[$offer->title] = '-$' . $value;
+                $this->discounts_sum += $value;
             }
         }
     }
