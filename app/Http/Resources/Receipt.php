@@ -6,12 +6,62 @@ use App\Models\Offer;
 
 class Receipt
 {
+
+    /**
+     * The count of all the items in cart.
+     * 
+     * @var float
+     */
+    public $total_items_count = 0;
+
+    /**
+     * The total sum of the price value for all the items in cart.
+     * 
+     * @var float
+     */
     public $subtotal = 0;
+
+    /**
+     * The total VAT taxes value for all the items in cart.
+     * 
+     * @var float
+     */
+    public $vat = 0;
+
+    /**
+     * The shipping fees value for all the items in cart.
+     * 
+     * @var float
+     */
     public $shipping = 0;
+
+    /**
+     * The total sum of all the applied discounts values.
+     * 
+     * @var float
+     */
     public $discounts_sum = 0;
+
+    /**
+     * The descriptions of all applied discounts.
+     * 
+     * @var array
+     */
     public $discounts = [];
+
+    /**
+     * The receipt total value.
+     * 
+     * @var float 
+     */
     public $total = 0;
 
+    /**
+     * Create a new receipt.
+     *
+     * @param  \Illuminate\Support\Collection $collection
+     * @return void
+     */
     public function __construct($collection)
     {
         $this->collection = $collection;
@@ -21,7 +71,7 @@ class Receipt
     /**
      * Calculate the parameters of the receipt.
      *
-     * @void
+     * @return void
      */
     public function calculate()
     {
@@ -38,7 +88,7 @@ class Receipt
     /**
      * Calculate the item's total price.
      *
-     * @return Array
+     * @return array
      */
     private function getTotal()
     {
@@ -53,9 +103,9 @@ class Receipt
     }
 
     /**
-     * Calculate the discounts that can apply on items on cart.
+     * Calculate the discounts that can apply on current cart items.
      *
-     * @void
+     * @return void
      */
     private function applyDiscounts()
     {
@@ -72,6 +122,11 @@ class Receipt
         }
     }
 
+    /**
+     * Get the offers that may be applied on the current cart items.
+     * 
+     * @return Illuminate\Support\Collection $offers
+     */
     private function getOffers()
     {
         $itemIds = $this->collection->pluck('id');
@@ -91,7 +146,7 @@ class Receipt
      * Check if the specified offer can be applied on some or all items in cart.
      *
      * @param  \App\Models\Offer  $offer
-     * @return Boolean
+     * @return boolean
      */
     private function isOfferApplicable($offer)
     {
@@ -110,7 +165,7 @@ class Receipt
      * Check if the count of all the items in cart validates the offer's rule.
      *
      * @param  \App\Models\Offer  $offer
-     * @return Boolean
+     * @return boolean
      */
     private function is_on_all_order_items_applicable_for_discount($offer)
     {
@@ -123,7 +178,7 @@ class Receipt
      * Check if the count of a single ItemType of the items in cart validates the offer's rule.
      *
      * @param  \App\Models\Offer  $offer
-     * @return Boolean
+     * @return boolean
      */
     private function is_itemtype_items_applicable_for_discount($offer)
     {
@@ -136,7 +191,7 @@ class Receipt
      * Check if the count of a single Item in cart validates the offer's rule.
      *
      * @param  \App\Models\Offer  $offer
-     * @return Boolean
+     * @return boolean
      */
     private function is_items_applicable_for_discount($offer)
     {
@@ -149,7 +204,7 @@ class Receipt
      * Find the $discountable for the specified offer.
      *
      * @param  \App\Models\Offer  $offer
-     * @return Float $discountable
+     * @return float $discountable
      */
     private function getDiscountable($offer)
     {
@@ -161,10 +216,10 @@ class Receipt
     /**
      * Calculate the discount value for the specified $discountable.
      *
-     * @param  String  $type
-     * @param  Float  $value
-     * @param  Float  $discountable
-     * @return Float $discount_value
+     * @param  string  $type
+     * @param  float  $value
+     * @param  float  $discountable
+     * @return float $discount_value
      */
     private function getDiscountValue($type = 'FIXED', $value, $discountable)
     {
