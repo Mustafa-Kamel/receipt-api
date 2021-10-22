@@ -17,7 +17,7 @@ class Item extends Model
         return $this->belongsTo(Country::class);
     }
 
-    public function itemtype()
+    public function itemType()
     {
         return $this->belongsTo(ItemType::class, 'type_id');
     }

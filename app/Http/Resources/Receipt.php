@@ -12,7 +12,7 @@ class Receipt
      * 
      * @var float
      */
-    public $total_items_count = 0;
+    public $totalItemsCount = 0;
 
     /**
      * The total sum of the price value for all the items in cart.
@@ -40,7 +40,7 @@ class Receipt
      * 
      * @var float
      */
-    public $discounts_sum = 0;
+    public $discountsSum = 0;
 
     /**
      * The descriptions of all applied discounts.
@@ -80,7 +80,7 @@ class Receipt
             $this->shipping += ($item->weight / $item->country->ship_weight) * $item->country->ship_rate;
         }
         $this->vat = $this->subtotal * env('VAT', 0.14);
-        $this->total_items_count = $this->collection->sum('count');
+        $this->totalItemsCount = $this->collection->sum('count');
         $this->applyDiscounts();
         $this->total = $this->getTotal();
     }
@@ -97,7 +97,7 @@ class Receipt
                 $this->subtotal,
                 $this->shipping,
                 $this->vat,
-                -$this->discounts_sum
+                -$this->discountsSum
             ]
         );
     }
@@ -117,7 +117,7 @@ class Receipt
                     $this->getDiscountable($offer)
                 );
                 $this->discounts[$offer->title] = '-$' . $value;
-                $this->discounts_sum += $value;
+                $this->discountsSum += $value;
             }
         }
     }
@@ -132,7 +132,7 @@ class Receipt
         $itemIds = $this->collection->pluck('id');
         $itemTypeIds = $this->collection->pluck('type_id');
         return Offer::whereNull('applied_on_id')
-            ->where('count_range_min', '<=', $this->total_items_count)
+            ->where('count_range_min', '<=', $this->totalItemsCount)
             ->orWhere(function ($query) use ($itemIds) {
                 $query->where('applied_on_type', \App\Models\Item::class)
                     ->whereIn('applied_on_id', $itemIds);
@@ -151,14 +151,14 @@ class Receipt
     private function isOfferApplicable($offer)
     {
         if (is_null($offer->applied_on_id))
-            return $this->is_on_all_order_items_applicable_for_discount($offer);
+            return $this->isAllOrderItemsApplicableForDiscount($offer);
 
         return (
             (app($offer->applied_on_type) instanceof \App\Models\ItemType
-                && $this->is_itemtype_items_applicable_for_discount($offer))
+                && $this->isItemTypeItemsApplicableForDiscount($offer))
             or
             (app($offer->applied_on_type) instanceof \App\Models\Item
-                && $this->is_items_applicable_for_discount($offer)));
+                && $this->isItemsApplicableForDiscount($offer)));
     }
 
     /**
@@ -167,9 +167,9 @@ class Receipt
      * @param  \App\Models\Offer  $offer
      * @return boolean
      */
-    private function is_on_all_order_items_applicable_for_discount($offer)
+    private function isAllOrderItemsApplicableForDiscount($offer)
     {
-        if ($this->total_items_count >= $offer->count_range_min)
+        if ($this->totalItemsCount >= $offer->count_range_min)
             return true;
         return false;
     }
@@ -180,9 +180,9 @@ class Receipt
      * @param  \App\Models\Offer  $offer
      * @return boolean
      */
-    private function is_itemtype_items_applicable_for_discount($offer)
+    private function isItemTypeItemsApplicableForDiscount($offer)
     {
-        if ($this->collection->where('type_id', $offer->applied_on->id)->sum('count') >= $offer->count_range_min)
+        if ($this->collection->where('type_id', $offer->appliedOn->id)->sum('count') >= $offer->count_range_min)
             return true;
         return false;
     }
@@ -193,9 +193,9 @@ class Receipt
      * @param  \App\Models\Offer  $offer
      * @return boolean
      */
-    private function is_items_applicable_for_discount($offer)
+    private function isItemsApplicableForDiscount($offer)
     {
-        if ($this->collection->where('id', $offer->applied_on->id)->sum('count') >= $offer->count_range_min)
+        if ($this->collection->where('id', $offer->appliedOn->id)->sum('count') >= $offer->count_range_min)
             return true;
         return false;
     }
@@ -208,9 +208,9 @@ class Receipt
      */
     private function getDiscountable($offer)
     {
-        return ($offer->is_shipping_discount()) ?
-            $this->shipping : ($offer->discount_on->price) ??
-            $this->collection->where('type_id', $offer->discount_on->id)->first()->price;
+        return ($offer->isShippingDiscount()) ?
+            $this->shipping : ($offer->discountOn->price) ??
+            $this->collection->where('type_id', $offer->discountOn->id)->first()->price;
     }
 
     /**

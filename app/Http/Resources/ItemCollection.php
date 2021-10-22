@@ -19,12 +19,12 @@ class ItemCollection extends ResourceCollection
         $receipt = new Receipt($this->collection);
         return [
             'items' => $this->collection,
-            'total_items_count' => $receipt->total_items_count,
+            'total_items_count' => $receipt->totalItemsCount,
             'receipt' => [
                 "Subtotal" => "$" . $receipt->subtotal,
                 "Shipping" => "$" . $receipt->shipping,
                 "VAT" => "$" . $receipt->vat,
-                "Discounts" => $this->when($receipt->discounts_sum, $receipt->discounts),
+                "Discounts" => $this->when($receipt->discountsSum, $receipt->discounts),
                 "Total" => "$" . $receipt->total
             ]
         ];

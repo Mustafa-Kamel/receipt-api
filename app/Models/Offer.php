@@ -14,17 +14,17 @@ class Offer extends Model
         'discount_value'
     ];
 
-    public function applied_on()
+    public function appliedOn()
     {
         return $this->morphTo(__FUNCTION__, 'applied_on_type', 'applied_on_id');
     }
 
-    public function discount_on()
+    public function discountOn()
     {
         return $this->morphTo(__FUNCTION__, 'discount_on_type', 'discount_on_id');
     }
 
-    public function is_shipping_discount()
+    public function isShippingDiscount()
     {
         if (app($this->discount_on_type) instanceof Shipping)
             return TRUE;
