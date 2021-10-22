@@ -50,24 +50,36 @@ trait discountable
 
     private function is_offer_applicable($offer)
     {
+        if (is_null($offer->applied_on_id))
+            return $this->is_on_all_order_items_applicable_for_discount($offer);
+
         return (
-            (is_null($offer->applied_on_id) && $this->is_all_items_applicable_for_discount($offer)))
+            (app($offer->applied_on_type) instanceof \App\Models\ItemType
+                && $this->is_itemtype_items_applicable_for_discount($offer))
             or
-            ($offer->applied_on && $this->is_itemtype_items_applicable_for_discount($offer));
+            (app($offer->applied_on_type) instanceof \App\Models\Item
+                && $this->is_items_applicable_for_discount($offer)));
+    }
+
+    private function is_on_all_order_items_applicable_for_discount($offer)
+    {
+        if ($this->total_items_count >= $offer->count_range_min)
+            return true;
+        return false;
     }
 
     private function is_itemtype_items_applicable_for_discount($offer)
     {
-        if ($this->collection->where('type_id', $offer->applied_on->id)->count() >= $offer->count_range_min)
-            return True;
-        return False;
+        if ($this->collection->where('type_id', $offer->applied_on->id)->sum('count') >= $offer->count_range_min)
+            return true;
+        return false;
     }
 
-    private function is_all_items_applicable_for_discount($offer)
+    private function is_items_applicable_for_discount($offer)
     {
-        if ($this->total_items_count >= $offer->count_range_min)
-            return True;
-        return False;
+        if ($this->collection->where('id', $offer->applied_on->id)->sum('count') >= $offer->count_range_min)
+            return true;
+        return false;
     }
 
     private function get_discountable($offer)
