@@ -53,9 +53,9 @@ trait discountable
     private function is_offer_applicable($offer)
     {
         return (
-            ($offer->applied_on && $this->is_itemtype_items_applicable_for_discount($offer))
+            (is_null($offer->applied_on_id) && $this->is_all_items_applicable_for_discount($offer)))
             or
-            (is_null($offer->applied_on_id) && $this->is_all_items_applicable_for_discount($offer)));
+            ($offer->applied_on && $this->is_itemtype_items_applicable_for_discount($offer));
     }
 
     private function is_itemtype_items_applicable_for_discount($offer)
