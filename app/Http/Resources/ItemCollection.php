@@ -6,12 +6,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class ItemCollection extends ResourceCollection
 {
-    use discountable;
     public static $wrap = 'items';
-    private $subtotal = 0;
-    private $shipping = 0;
-    private $discounts_sum = 0;
-    private $discounts = [];
 
     /**
      * Transform the resource collection into an array.
@@ -21,17 +16,16 @@ class ItemCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        $this->total_items_count = $this->collection->sum('count');
-        $this->run_calculations();
+        $receipt = new Receipt($this->collection);
         return [
             'items' => $this->collection,
-            'total_items_count' => $this->total_items_count,
+            'total_items_count' => $receipt->total_items_count,
             'receipt' => [
-                "Subtotal" => "$" . $this->subtotal,
-                "Shipping" => "$" . $this->shipping,
-                "VAT" => "$" . $this->vat,
-                "Discounts" => $this->when($this->discounts_sum, $this->discounts),
-                "Total" => "$" . $this->total()
+                "Subtotal" => "$" . $receipt->subtotal,
+                "Shipping" => "$" . $receipt->shipping,
+                "VAT" => "$" . $receipt->vat,
+                "Discounts" => $this->when($receipt->discounts_sum, $receipt->discounts),
+                "Total" => "$" . $receipt->total
             ]
         ];
     }

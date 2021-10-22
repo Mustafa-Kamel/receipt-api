@@ -4,25 +4,35 @@ namespace App\Http\Resources;
 
 use App\Models\Offer;
 
-trait discountable
+class Receipt
 {
+    public $subtotal = 0;
+    public $shipping = 0;
+    public $discounts_sum = 0;
+    public $discounts = [];
+    public $total = 0;
+
+    public function __construct($collection)
+    {
+        $this->collection = $collection;
+        $this->calculate();
+    }
 
     /**
      * Calculate the parameters of the receipt.
      *
      * @void
      */
-    private function run_calculations()
+    public function calculate()
     {
-        $this->offers = Offer::whereNull('applied_on_id')->get();
         foreach ($this->collection as $item) {
             $this->subtotal += $item->price * $item->count;
             $this->shipping += ($item->weight / $item->country->ship_weight) * $item->country->ship_rate;
-            $item_offers = $item->offers()->where('count_range_min', '<=', $item->count);
-            $this->offers = $this->offers->merge($item->itemtype->offers()->union($item_offers)->get());
         }
         $this->vat = $this->subtotal * env('VAT', 0.14);
-        $this->apply_discounts();
+        $this->total_items_count = $this->collection->sum('count');
+        $this->applyDiscounts();
+        $this->total = $this->getTotal();
     }
 
     /**
@@ -30,7 +40,7 @@ trait discountable
      *
      * @return Array
      */
-    private function total()
+    private function getTotal()
     {
         return array_sum(
             [
@@ -47,19 +57,34 @@ trait discountable
      *
      * @void
      */
-    private function apply_discounts()
+    private function applyDiscounts()
     {
-        foreach ($this->offers as $offer) {
-            if ($this->is_offer_applicable($offer)) {
-                $value = $this->get_discount_value(
+        foreach ($this->getOffers() as $offer) {
+            if ($this->isOfferApplicable($offer)) {
+                $value = $this->getDiscountValue(
                     $offer->discount_type,
                     $offer->discount_value,
-                    $this->get_discountable($offer)
+                    $this->getDiscountable($offer)
                 );
                 $this->discounts[$offer->title] = '-$' . $value;
                 $this->discounts_sum += $value;
             }
         }
+    }
+
+    private function getOffers()
+    {
+        $itemIds = $this->collection->pluck('id');
+        $itemTypeIds = $this->collection->pluck('type_id');
+        return Offer::whereNull('applied_on_id')
+            ->where('count_range_min', '<=', $this->total_items_count)
+            ->orWhere(function ($query) use ($itemIds) {
+                $query->where('applied_on_type', \App\Models\Item::class)
+                    ->whereIn('applied_on_id', $itemIds);
+            })->orWhere(function ($query) use ($itemTypeIds) {
+                $query->where('applied_on_type', \App\Models\ItemType::class)
+                    ->whereIn('applied_on_id', $itemTypeIds);
+            })->get();
     }
 
     /**
@@ -68,7 +93,7 @@ trait discountable
      * @param  \App\Models\Offer  $offer
      * @return Boolean
      */
-    private function is_offer_applicable($offer)
+    private function isOfferApplicable($offer)
     {
         if (is_null($offer->applied_on_id))
             return $this->is_on_all_order_items_applicable_for_discount($offer);
@@ -126,7 +151,7 @@ trait discountable
      * @param  \App\Models\Offer  $offer
      * @return Float $discountable
      */
-    private function get_discountable($offer)
+    private function getDiscountable($offer)
     {
         return ($offer->is_shipping_discount()) ?
             $this->shipping : ($offer->discount_on->price) ??
@@ -141,7 +166,7 @@ trait discountable
      * @param  Float  $discountable
      * @return Float $discount_value
      */
-    private function get_discount_value($type = 'FIXED', $value, $discountable)
+    private function getDiscountValue($type = 'FIXED', $value, $discountable)
     {
         if ($type == 'PERCENT')
             return $value * $discountable;
