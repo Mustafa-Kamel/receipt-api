@@ -60,7 +60,7 @@ trait discountable
 
     private function is_itemtype_items_applicable_for_discount($offer)
     {
-        if ($this->collection->where('type_id', $offer->applied_on->id)->count() >= $offer->count_min_range)
+        if ($this->collection->where('type_id', $offer->applied_on->id)->count() >= $offer->count_range_min)
             return True;
         return False;
     }
