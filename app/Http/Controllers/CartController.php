@@ -16,9 +16,14 @@ class CartController extends Controller
      */
     public function new(CartRequest $request)
     {
-        $items = $request->collect('items')->map(function ($obj) {
-            $item = Item::find($obj['id']);
-            $item->count = (int)$obj['count'];
+        $cartItems = $request->collect('items');
+        if (count($cartItems->duplicates('id')))
+            abort(400, "Duplicate entries for the same item are not allowed!");
+
+        $cartItems = $cartItems->keyBy('id')->toArray();
+        $items = Item::whereIn('id', array_keys($cartItems))->get();
+        $items = $items->map(function ($item) use ($cartItems) {
+            $item->count = (int)$cartItems[$item->id]['count'];
             return $item;
         });
         return new ItemCollection($items);
