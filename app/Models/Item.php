@@ -31,4 +31,14 @@ class Item extends Model
     {
         return $this->morphMany(Offer::class, __FUNCTION__, 'discount_on_type', 'discount_on_id');
     }
+
+    public function subtotal()
+    {
+        return $this->price * $this->count;
+    }
+
+    public function shippingFees()
+    {
+        return ($this->weight / $this->country->ship_weight) * $this->country->ship_rate;
+    }
 }

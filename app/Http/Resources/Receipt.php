@@ -76,8 +76,8 @@ class Receipt
     public function calculate()
     {
         foreach ($this->collection as $item) {
-            $this->subtotal += $item->price * $item->count;
-            $this->shippingFees += ($item->weight / $item->country->ship_weight) * $item->country->ship_rate;
+            $this->subtotal += $item->subtotal();
+            $this->shippingFees += $item->shippingFees();
         }
         $this->vat = $this->subtotal * env('VAT', 0.14);
         $this->totalItemsCount = $this->collection->sum('count');
