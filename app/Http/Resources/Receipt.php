@@ -111,14 +111,14 @@ class Receipt
     {
         foreach ($this->getOffers() as $offer) {
             $numberOfDiscounts = min(
-                $this->getMaxNumberOfDiscounts($offer),
+                $this->getMaxNumberOfEligibleDiscounts($offer),
                 $this->getNumberOfDiscountables($offer)
             );
             if ($numberOfDiscounts) {
                 $value = $this->getDiscountValue(
                     $offer->discount_type,
                     $offer->discount_value,
-                    $this->getDiscountable($offer),
+                    $this->getDiscountablePrice($offer),
                     $numberOfDiscounts
                 );
                 $discount_title =  ($numberOfDiscounts > 1) ?
@@ -155,18 +155,12 @@ class Receipt
      * @param  \App\Models\Offer  $offer
      * @return int
      */
-    private function getMaxNumberOfDiscounts($offer)
+    private function getMaxNumberOfEligibleDiscounts($offer)
     {
         if (is_null($offer->applied_on_id))
             $itemsCount = $this->totalItemsCount;
         else {
-            $field = '';
-            $appliedOnType = app($offer->applied_on_type);
-            if ($appliedOnType instanceof \App\Models\ItemType) {
-                $field = 'type_id';
-            } elseif ($appliedOnType instanceof \App\Models\Item) {
-                $field = 'id';
-            }
+            $field = $this->getSearchField(app($offer->applied_on_type));
             $itemsCount = $this->collection->where($field, $offer->appliedOn->id)->sum('count');
         }
 
@@ -186,15 +180,27 @@ class Receipt
         if (is_null($offer->discount_on_id))
             return $this->totalItemsCount;
 
-        $discountOnType = app($offer->discount_on_type);
-        $field = '';
-        if ($discountOnType instanceof \App\Models\ItemType) {
-            $field = 'type_id';
-        } elseif ($discountOnType instanceof \App\Models\Item) {
-            $field = 'id';
-        }
+        $field = $this->getSearchField(app($offer->discount_on_type));
 
         return $this->collection->where($field, $offer->discountOn->id)->sum('count');
+    }
+
+    /**
+     * Get the field to use as the search index in the collection depending on the specified model type.
+     * 
+     * @param \App\Models\ItemType|\App\Models\Item $type
+     * @return string $field
+     */
+    private function getSearchField($type)
+    {
+        if ($type instanceof \App\Models\ItemType) {
+            $field = 'type_id';
+        } elseif ($type instanceof \App\Models\Item) {
+            $field = 'id';
+        } else {
+            $field = '';
+        }
+        return $field;
     }
 
     /**
@@ -203,7 +209,7 @@ class Receipt
      * @param  \App\Models\Offer  $offer
      * @return float $discountable
      */
-    private function getDiscountable($offer)
+    private function getDiscountablePrice($offer)
     {
         return ($offer->isShippingDiscount()) ?
             $this->shippingFees : ($offer->discountOn->price) ??
