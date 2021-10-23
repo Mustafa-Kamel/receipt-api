@@ -52,4 +52,15 @@ class CartTest extends TestCase
             ->assertJsonCount(3, 'items')
             ->assertJson(json_decode(Storage::get("fixtures/cartResponse3_offersMultiple.json"), true));
     }
+
+    /**
+     * Test the output of making a request with data that are eligible for same offers multiple times.
+     *
+     * @return void
+     */
+    public function testMakeCartRequestWithValidationErrors()
+    {
+        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/cartRequest_validationErrors.json"), true));
+        $response->assertStatus(422);
+    }
 }
