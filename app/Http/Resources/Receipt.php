@@ -136,17 +136,25 @@ class Receipt
      */
     private function getOffers()
     {
+        $totalItemsCount = $this->totalItemsCount;
         $itemIds = $this->collection->pluck('id');
         $itemTypeIds = $this->collection->pluck('type_id');
-        return Offer::whereNull('applied_on_id')
-            ->where('count_range_min', '<=', $this->totalItemsCount)
-            ->orWhere(function ($query) use ($itemIds) {
-                $query->where('applied_on_type', \App\Models\Item::class)
-                    ->whereIn('applied_on_id', $itemIds);
-            })->orWhere(function ($query) use ($itemTypeIds) {
-                $query->where('applied_on_type', \App\Models\ItemType::class)
-                    ->whereIn('applied_on_id', $itemTypeIds);
-            })->get();
+        return Offer::where('valid_from', '<=', \Carbon\Carbon::now())
+            ->where('expires_at', '>', \Carbon\Carbon::now())
+            ->where(
+                function ($query) use ($totalItemsCount, $itemIds, $itemTypeIds) {
+                    $query->where(function ($query) use ($totalItemsCount) {
+                        $query->whereNull('applied_on_id')
+                            ->where('count_range_min', '<=', $totalItemsCount);
+                    })->orWhere(function ($query) use ($itemIds) {
+                        $query->where('applied_on_type', \App\Models\Item::class)
+                            ->whereIn('applied_on_id', $itemIds);
+                    })->orWhere(function ($query) use ($itemTypeIds) {
+                        $query->where('applied_on_type', \App\Models\ItemType::class)
+                            ->whereIn('applied_on_id', $itemTypeIds);
+                    });
+                }
+            )->get();
     }
 
     /**
