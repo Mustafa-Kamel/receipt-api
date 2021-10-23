@@ -18,11 +18,11 @@ class CartTest extends TestCase
      */
     public function testMakeCartRequestWithoutOffers()
     {
-        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/cartRequest2_noOffers.json"), true));
+        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/test_data/cartRequest2_noOffers.json"), true));
         $response
             ->assertStatus(200)
             ->assertJsonCount(1, 'items')
-            ->assertJson(json_decode(Storage::get("fixtures/cartResponse2_noOffers.json"), true));
+            ->assertJson(json_decode(Storage::get("fixtures/test_data/cartResponse2_noOffers.json"), true));
     }
 
     /**
@@ -32,11 +32,11 @@ class CartTest extends TestCase
      */
     public function testMakeCartRequestWithOffers()
     {
-        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/cartRequest1_offers.json"), true));
+        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/test_data/cartRequest1_offers.json"), true));
         $response
             ->assertStatus(200)
             ->assertJsonCount(5, 'items')
-            ->assertJson(json_decode(Storage::get("fixtures/cartResponse1_offers.json"), true));
+            ->assertJson(json_decode(Storage::get("fixtures/test_data/cartResponse1_offers.json"), true));
     }
 
     /**
@@ -46,11 +46,11 @@ class CartTest extends TestCase
      */
     public function testMakeCartRequestWithOffersMultiple()
     {
-        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/cartRequest3_offersMultiple.json"), true));
+        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/test_data/cartRequest3_offersMultiple.json"), true));
         $response
             ->assertStatus(200)
             ->assertJsonCount(3, 'items')
-            ->assertJson(json_decode(Storage::get("fixtures/cartResponse3_offersMultiple.json"), true));
+            ->assertJson(json_decode(Storage::get("fixtures/test_data/cartResponse3_offersMultiple.json"), true));
     }
 
     /**
@@ -60,7 +60,7 @@ class CartTest extends TestCase
      */
     public function testMakeCartRequestWithValidationErrors()
     {
-        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/cartRequest_validationErrors.json"), true));
+        $response = $this->postJson('/api/cart/new', json_decode(Storage::get("fixtures/test_data/cartRequest_validationErrors.json"), true));
         $response->assertStatus(422);
     }
 }
