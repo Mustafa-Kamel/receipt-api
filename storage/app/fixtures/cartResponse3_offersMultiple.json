@@ -1,0 +1,46 @@
+{
+    "items": [
+        {
+            "id": 1,
+            "title": "T-shirt",
+            "count": 7,
+            "price": "30.99",
+            "weight": 200,
+            "type": "Tops",
+            "country": "United States of America",
+            "country_code": "US"
+        },
+        {
+            "id": 5,
+            "title": "Jacket",
+            "count": 10,
+            "price": "199.99",
+            "weight": 2200,
+            "type": "Jackets",
+            "country": "United States of America",
+            "country_code": "US"
+        },
+        {
+            "id": 6,
+            "title": "Shoes",
+            "count": 3,
+            "price": "79.99",
+            "weight": 1300,
+            "type": "Shoes",
+            "country": "Republic of China",
+            "country_code": "CN"
+        }
+    ],
+    "total_items_count": 20,
+    "receipt": {
+        "Subtotal": "$2456.8",
+        "Shipping": "$74",
+        "VAT": "$343.952",
+        "Discounts": {
+            "3 * 10% off shoes": "-$23.997",
+            "3 * 50% off jacket": "-$299.985",
+            "$10 of shipping": "-$10"
+        },
+        "Total": "$2540.77"
+    }
+}
