@@ -33,7 +33,7 @@ class Receipt
      * 
      * @var float
      */
-    public $shipping = 0;
+    public $shippingFees = 0;
 
     /**
      * The total sum of all the applied discounts values.
@@ -77,7 +77,7 @@ class Receipt
     {
         foreach ($this->collection as $item) {
             $this->subtotal += $item->price * $item->count;
-            $this->shipping += ($item->weight / $item->country->ship_weight) * $item->country->ship_rate;
+            $this->shippingFees += ($item->weight / $item->country->ship_weight) * $item->country->ship_rate;
         }
         $this->vat = $this->subtotal * env('VAT', 0.14);
         $this->totalItemsCount = $this->collection->sum('count');
@@ -95,7 +95,7 @@ class Receipt
         return array_sum(
             [
                 $this->subtotal,
-                $this->shipping,
+                $this->shippingFees,
                 $this->vat,
                 -$this->discountsSum
             ]
@@ -110,13 +110,20 @@ class Receipt
     private function applyDiscounts()
     {
         foreach ($this->getOffers() as $offer) {
-            if ($this->isOfferApplicable($offer)) {
+            $numberOfDiscounts = min(
+                $this->getMaxNumberOfDiscounts($offer),
+                $this->getNumberOfDiscountables($offer)
+            );
+            if ($numberOfDiscounts) {
                 $value = $this->getDiscountValue(
                     $offer->discount_type,
                     $offer->discount_value,
-                    $this->getDiscountable($offer)
+                    $this->getDiscountable($offer),
+                    $numberOfDiscounts
                 );
-                $this->discounts[$offer->title] = '-$' . $value;
+                $discount_title =  ($numberOfDiscounts > 1) ?
+                    $numberOfDiscounts . ' * ' . $offer->title : $offer->title;
+                $this->discounts[$discount_title] = '-$' . $value;
                 $this->discountsSum += $value;
             }
         }
@@ -143,56 +150,55 @@ class Receipt
     }
 
     /**
-     * Check if the specified offer can be applied on some or all items in cart.
+     * Get the max number of eligible discount of the specified offer.
      *
      * @param  \App\Models\Offer  $offer
-     * @return boolean
+     * @return int
      */
-    private function isOfferApplicable($offer)
+    private function getMaxNumberOfDiscounts($offer)
     {
         if (is_null($offer->applied_on_id))
-            return $this->isAllOrderItemsApplicableForDiscount($offer);
+            $itemsCount = $this->totalItemsCount;
+        else {
+            $field = '';
+            $appliedOnType = app($offer->applied_on_type);
+            if ($appliedOnType instanceof \App\Models\ItemType) {
+                $field = 'type_id';
+            } elseif ($appliedOnType instanceof \App\Models\Item) {
+                $field = 'id';
+            }
+            $itemsCount = $this->collection->where($field, $offer->appliedOn->id)->sum('count');
+        }
 
-        $appliedOnType = app($offer->applied_on_type);
+        if ($offer->count_range_min == $offer->count_range_max)
+            return floor($itemsCount / $offer->count_range_min);
+        return (int) ($itemsCount >= $offer->count_range_min);
+    }
+
+    /**
+     * Get the number of the items in cart that are eligible for the discount of the specified offer.
+     *
+     * @param  \App\Models\Offer  $offer
+     * @return int
+     */
+    private function getNumberOfDiscountables($offer)
+    {
+        if (is_null($offer->discount_on_id))
+            return $this->totalItemsCount;
+
+        $discountOnType = app($offer->discount_on_type);
         $field = '';
-        if ($appliedOnType instanceof \App\Models\ItemType) {
+        if ($discountOnType instanceof \App\Models\ItemType) {
             $field = 'type_id';
-        } elseif ($appliedOnType instanceof \App\Models\Item) {
+        } elseif ($discountOnType instanceof \App\Models\Item) {
             $field = 'id';
         }
 
-        return $field && $this->isApplicableForDiscount($offer, $field);
+        return $this->collection->where($field, $offer->discountOn->id)->sum('count');
     }
 
     /**
-     * Check if the count of all the items in cart validates the offer's rule.
-     *
-     * @param  \App\Models\Offer  $offer
-     * @return boolean
-     */
-    private function isAllOrderItemsApplicableForDiscount($offer)
-    {
-        if ($this->totalItemsCount >= $offer->count_range_min)
-            return true;
-        return false;
-    }
-
-    /**
-     * Check if the count of items of the specified field in cart validates the offer's rule.
-     *
-     * @param  \App\Models\Offer  $offer
-     * @param string $field
-     * @return boolean
-     */
-    private function isApplicableForDiscount($offer, $field)
-    {
-        if ($this->collection->where($field, $offer->appliedOn->id)->sum('count') >= $offer->count_range_min)
-            return true;
-        return false;
-    }
-
-    /**
-     * Find the $discountable for the specified offer.
+     * Get the value (price) of the $discountable for the specified offer.
      *
      * @param  \App\Models\Offer  $offer
      * @return float $discountable
@@ -200,22 +206,23 @@ class Receipt
     private function getDiscountable($offer)
     {
         return ($offer->isShippingDiscount()) ?
-            $this->shipping : ($offer->discountOn->price) ??
-            $this->collection->where('type_id', $offer->discountOn->id)->first()->price;
+            $this->shippingFees : ($offer->discountOn->price) ??
+            $this->collection->where('type_id', $offer->discountOn->id)->sum('price');
     }
 
     /**
-     * Calculate the discount value for the specified $discountable.
+     * Calculate the discount value for the specified $discountable
+     * depending on the discount type and the discountable price.
      *
      * @param  string  $type
      * @param  float  $value
      * @param  float  $discountable
+     * @param  int  $numberOfDiscounts
      * @return float $discount_value
      */
-    private function getDiscountValue($type = 'FIXED', $value, $discountable)
+    private function getDiscountValue($type = 'FIXED', $value, $discountable, $numberOfDiscounts)
     {
-        if ($type == 'PERCENT')
-            return $value * $discountable;
-        return $value;
+        return ($type == 'PERCENT') ?
+            $value * $discountable * $numberOfDiscounts : $value * $numberOfDiscounts;
     }
 }

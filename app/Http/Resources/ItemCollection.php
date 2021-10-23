@@ -22,7 +22,7 @@ class ItemCollection extends ResourceCollection
             'total_items_count' => $receipt->totalItemsCount,
             'receipt' => [
                 "Subtotal" => "$" . $receipt->subtotal,
-                "Shipping" => "$" . $receipt->shipping,
+                "Shipping" => "$" . $receipt->shippingFees,
                 "VAT" => "$" . $receipt->vat,
                 "Discounts" => $this->when($receipt->discountsSum, $receipt->discounts),
                 "Total" => "$" . $receipt->total
