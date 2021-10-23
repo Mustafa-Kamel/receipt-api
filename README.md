@@ -228,3 +228,4 @@ The following things I will implement if I spent more time on this project or in
 - Check each product availability in inventory before proceeding with the request (for that I added the in_stock column to the items table)
 - Add a column "priority" to the offers table, this will be used if the cart got multiple discounts on the same item and this is determined by the business logic more.
 - Add a promo code support to the system by adding a new type of offers, this could be implemented by adding a new promo_code to the offers table and another offer_type columng and handle each one differently.
+- Add more test coverage and unit tests.
