@@ -153,12 +153,15 @@ class Receipt
         if (is_null($offer->applied_on_id))
             return $this->isAllOrderItemsApplicableForDiscount($offer);
 
-        return (
-            (app($offer->applied_on_type) instanceof \App\Models\ItemType
-                && $this->isItemTypeItemsApplicableForDiscount($offer))
-            or
-            (app($offer->applied_on_type) instanceof \App\Models\Item
-                && $this->isItemsApplicableForDiscount($offer)));
+        $appliedOnType = app($offer->applied_on_type);
+        $field = '';
+        if ($appliedOnType instanceof \App\Models\ItemType) {
+            $field = 'type_id';
+        } elseif ($appliedOnType instanceof \App\Models\Item) {
+            $field = 'id';
+        }
+
+        return $field && $this->isApplicableForDiscount($offer, $field);
     }
 
     /**
@@ -175,27 +178,15 @@ class Receipt
     }
 
     /**
-     * Check if the count of a single ItemType of the items in cart validates the offer's rule.
+     * Check if the count of items of the specified field in cart validates the offer's rule.
      *
      * @param  \App\Models\Offer  $offer
+     * @param string $field
      * @return boolean
      */
-    private function isItemTypeItemsApplicableForDiscount($offer)
+    private function isApplicableForDiscount($offer, $field)
     {
-        if ($this->collection->where('type_id', $offer->appliedOn->id)->sum('count') >= $offer->count_range_min)
-            return true;
-        return false;
-    }
-
-    /**
-     * Check if the count of a single Item in cart validates the offer's rule.
-     *
-     * @param  \App\Models\Offer  $offer
-     * @return boolean
-     */
-    private function isItemsApplicableForDiscount($offer)
-    {
-        if ($this->collection->where('id', $offer->appliedOn->id)->sum('count') >= $offer->count_range_min)
+        if ($this->collection->where($field, $offer->appliedOn->id)->sum('count') >= $offer->count_range_min)
             return true;
         return false;
     }
