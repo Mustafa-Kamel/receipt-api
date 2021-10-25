@@ -181,7 +181,7 @@ php artisan db:seed
 ```bash
 php artisan key:generate
 ```
-- Once its done go ahead and start the server
+- Once its done go ahead and start the server.
 ```bash
 php artisan serve
 ```
